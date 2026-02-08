@@ -8,7 +8,7 @@
 </head>
 <body>
     <header>
-        <h1>Payak DB Project</h1>
+        <h1>PayakDB</h1>
         <nav>
             <a href="index.php">Home</a>
         </nav>
