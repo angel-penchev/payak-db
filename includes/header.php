@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payak DB Project</title>
+    <title>PayakDB</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
     <header>
-        <h1>PayakDB</h1>
         <nav>
-            <a href="index.php">Home</a>
+            <a href="index.php"><b>PayakDB</b></a>
         </nav>
     </header>
-    <main>
