@@ -1,52 +1,58 @@
 <?php
 require_once 'config/db.php';
+require_once 'config/project.php';
 
-// Get the route from the URL (default to 'home' if empty)
 $request = isset($_GET['route']) ? $_GET['route'] : '/';
-
-// Remove trailing slashes for consistency (e.g., /courses/ -> /courses)
 $request = rtrim($request, '/');
 
-// Router Logic
+$view = null;
+
 switch ($request) {
+    // --- Route: Courses ---
     case '':
     case '/':
     case 'courses':
-        // GET /
-        require 'views/courses.php';
+        $view = 'views/courses.php';
         break;
 
+    // --- Route: Create Course ---
     case 'courses/course-create':
-        // GET /courses/course-create
-        require 'views/course_create.php';
+        $view = 'views/course_create.php';
         break;
+
     default:
-        // Handle Dynamic Routes (using Regex)
-        // Match GET /courses/<id>  (e.g., courses/w25-2025-2026)
+        // Route: View Course (GET /courses/w25-2025-2026)
         if (preg_match('/^courses\/(\d+)$/', $request, $matches)) {
             $courseId = $matches[1];
-            require 'views/course_detail.php';
+            $view = 'views/course_detail.php';
             break;
         }
 
-        // Match GET /courses/<id>/project-create
+        // Route: Create Project (GET /courses/w25-2025-2026/project-create)
         if (preg_match('/^courses\/(\d+)\/project-create$/', $request, $matches)) {
             $courseId = $matches[1];
-            require 'views/project_create.php';
+            $view = 'views/project_create.php';
             break;
         }
 
-        // Match GET /courses/<id>/projects/<id>
+        // Route: View Project (GET /courses/w25-2025-2026/projects/fcf9edf9-0d01-4250-b17b-a6e3c466a7df)
         if (preg_match('/^courses\/(\d+)\/projects\/(\d+)$/', $request, $matches)) {
             $courseId = $matches[1];
             $projectId = $matches[2];
-            require 'views/project_detail.php';
+            $view = 'views/project_detail.php';
             break;
         }
 
-        // 404 Not Found
+        // --- 404 Not Found ---
         http_response_code(404);
-        require 'views/404.php';
+        $view = 'views/404.php';
         break;
+}
+
+// Render the page
+if ($view) {
+    include 'includes/header.php';
+    include $view;
+    include 'includes/footer.php';
 }
 ?>
