@@ -5,11 +5,18 @@ This project is self-contained. The entry point is `index.php` in the root direc
 * **assets/** - CSS, JS, Images
 * **config/** - Database connection (PDO)
 * **includes/** - Header, Footer, helper functions
-* **sql/** - Database import file
+* **sql/** - Contains `setup.sql` for database initialization
+* **views/** - Page templates and logic
+
+## 🛠️ Technologies
+* **Backend:** PHP (Vanilla)
+* **Database:** MySQL / MariaDB
+* **Frontend:** Tailwind CSS (via CDN)
+    * *Note: An active internet connection is required to load styles.*
 
 ---
 
-## 🚀 Setup for Windows
+## 🚀 Setup for Windows (Lecturer / Evaluator)
 
 1.  **Download & Place:**
     * Download or clone this repository.
@@ -18,7 +25,9 @@ This project is self-contained. The entry point is `index.php` in the root direc
 2.  **Database Setup:**
     * Open **phpMyAdmin** (`http://localhost/phpmyadmin`).
     * Create a new database named **`payak_db`**.
-    * Import the SQL file located in: `sql/database.sql` (if available) or simply create the database to satisfy the connection check.
+    * Select the new database and go to the **Import** tab.
+    * Upload the file located in: `sql/setup.sql`.
+    * Click **Go** (Import).
 
 3.  **Run:**
     * Open your browser and visit: [http://localhost/payak-db/](http://localhost/payak-db/)
@@ -48,9 +57,11 @@ Keep the project in your home directory (where you have full permissions) and "l
 
 3.  **Database Setup:**
     ```bash
+    # Create the DB
     /opt/lampp/bin/mysql -u root -e "CREATE DATABASE payak_db;"
-    # If you have an SQL dump to import:
-    # /opt/lampp/bin/mysql -u root payak_db < sql/database.sql
+
+    # Import the structure
+    /opt/lampp/bin/mysql -u root payak_db < ~/payak-db/sql/setup.sql
     ```
 
 ### Method 2: Direct Install (Fixing Permissions)
@@ -63,11 +74,11 @@ If you cloned directly into `/opt/lampp/htdocs`, you likely cannot edit files. F
     ```
 
 2.  **Fix Permissions (Give ownership to your user):**
-    Replace `your_username` with your actual Linux username (run `whoami` to check).
     ```bash
     sudo chown -R $USER:$USER /opt/lampp/htdocs/payak-db
     sudo chmod -R 755 /opt/lampp/htdocs/payak-db
     ```
+    *(Then run the database setup commands from Method 1)*
 
 ---
 
