@@ -183,7 +183,9 @@ try {
             <?php foreach ($active_courses as $course): ?>
                 <div class="big-card">
                     <div>
-                        <h2><?php echo htmlspecialchars($course['display_name']); ?></h2>
+                        <a href="/payak-db/courses/<?php echo htmlspecialchars($course['id']); ?>" style="text-decoration:none; color:inherit;" target="_blank">
+                            <h2><?php echo htmlspecialchars($course['display_name']); ?></h2>
+                        </a>
                         <div class="tag">
                             ID: <?php echo htmlspecialchars($course['id']); ?>
                         </div>
@@ -191,7 +193,7 @@ try {
                     
                     <div class="card-footer">
                         <?php if (!empty($course['moodle_course_url'])): ?>
-                            <a href="<?php echo htmlspecialchars($course['moodle_course_url']); ?>" target="_blank" style="text-decoration:none;">
+                            <a href="<?php echo htmlspecialchars($course['moodle_course_url']); ?>" target="_blank" style="text-decoration:none;" >
                                 🔗 Moodle
                             </a>
                         <?php endif; ?>
@@ -226,13 +228,9 @@ try {
                     </div>
                     
                     <div class="arrow-icon">
-                        <?php if (!empty($course['moodle_course_url'])): ?>
-                            <a href="<?php echo htmlspecialchars($course['moodle_course_url']); ?>" style="text-decoration:none; color:inherit;">
-                                &rarr;
-                            </a>
-                        <?php else: ?>
+                        <a href="/payak-db/courses/<?php echo htmlspecialchars($course['id']); ?>" style="text-decoration:none; color:inherit;" target="_blank">
                             &rarr;
-                        <?php endif; ?>
+                        </a>
                     </div>
                 </div>
             <?php endforeach; ?>
