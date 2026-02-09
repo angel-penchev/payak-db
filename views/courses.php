@@ -6,7 +6,7 @@
   </p>
   <p>This structure is ready for Windows XAMPP deployment.</p>
 
-  <div class="p-10 max-w-md mx-auto">
+  <div class="p-10 max-w-md mx-auto bg-red-100">
     <ui-card>
       <ui-card-header>
         <ui-card-title>Login</ui-card-title>
@@ -14,7 +14,7 @@
       </ui-card-header>
 
       <ui-card-content>
-        <p>
+        <p class="text-xl">
           gosho
         </p>
       </ui-card-content>
