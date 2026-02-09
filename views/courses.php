@@ -19,10 +19,20 @@ try {
 
     // LOGIC: Split the courses
     // 1. Slice the first 2 for the top "Big Box" section
-    $active_courses = array_slice($all_courses, 0, 2);
+    $temp_active = array_slice($all_courses, 0, 2);
     
     // 2. Slice the rest (starting from index 2) for the bottom list
     $other_courses = array_slice($all_courses, 2);
+
+    foreach ($temp_active as $course) {
+        $stmt_proj = $pdo->prepare("SELECT * FROM group_projects WHERE course_id = ?");
+        $stmt_proj->execute([$course['id']]);
+        $projects = $stmt_proj->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Add the projects array to the course data so we can access it in the HTML
+        $course['projects'] = $projects;
+        $active_courses[] = $course;
+    }
 
 } catch (PDOException $e) {
     die("Error fetching courses: " . $e->getMessage());
@@ -94,9 +104,10 @@ try {
         }
 
         .card-footer {
-            margin-top: 20px;
-            text-align: right;
-            font-size: 1.2em;
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px; /* Adds space between the icons */
+            align-items: center;
         }
 
         /* --- MIDDLE (CREATE BUTTON) --- */
@@ -185,7 +196,9 @@ try {
                             </a>
                         <?php endif; ?>
                         
-                        👤 <?php echo htmlspecialchars($course['enrolled_count'] ?? 0); ?> 
+                        <span>👤 <?php echo htmlspecialchars($course['enrolled_count'] ?? 0); ?> </span>
+
+                        <span>🌐 <?php echo count($course['projects'] ?? []); ?></span>
                     </div>
                 </div>
             <?php endforeach; ?>
