@@ -217,7 +217,7 @@ try {
         // Note: Ensure you have session_start(); at the very top of your PHP file!
         if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): 
         ?>
-            <a href="/courses/<?php echo $course_id; ?>/course-create" 
+            <a href="/courses/<?php echo $course['id']; ?>/course-create" 
               class="btn-create" 
               target="_blank" 
               rel="noopener noreferrer">
