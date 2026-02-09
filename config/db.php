@@ -1,9 +1,9 @@
 <?php
 // config/db.php
 $host = 'localhost';
-$dbname = 'payak_db_name'; // CHANGE THIS to your actual DB name
+$dbname = 'payak_db';
 $user = 'root';
-$pass = ''; // Leave empty for Windows XAMPP compatibility
+$pass = ''; // XAMPP default password
 
 try {
     $pdo = new PDO("mysql:host=$host;dbname=$dbname;charset=utf8", $user, $pass);
