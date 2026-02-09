@@ -1,5 +1,7 @@
 <?php
 
+session_start();
+
 require_once 'config/db.php';
 require_once 'config/project.php';
 
@@ -16,9 +18,19 @@ switch ($request) {
         $view = 'views/courses.php';
         break;
 
+    case 'login':
+        $view = 'views/login.php';
+        break;
+
     case 'register':
         $view = 'views/register.php';
         break;
+
+    case 'logout':
+        // Destroy the session and redirect to login
+        session_destroy();
+        header("Location: " . BASE_URL . "/login");
+        exit;
 
     // --- Route: Create Course ---
     case 'courses/course-create':
