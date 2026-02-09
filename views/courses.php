@@ -212,7 +212,18 @@ try {
 
     <div class="action-bar">
         <span>Other Courses</span>
-        <a href="#" class="btn-create">+ Create Course</a>
+        <?php 
+        // Check if the session 'role' is set and matches 'admin'
+        // Note: Ensure you have session_start(); at the very top of your PHP file!
+        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): 
+        ?>
+            <a href="/courses/<?php echo $course_id; ?>/course-create" 
+              class="btn-create" 
+              target="_blank" 
+              rel="noopener noreferrer">
+              + Create Course
+            </a>
+        <?php endif; ?>
     </div>
 
 
