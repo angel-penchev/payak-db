@@ -5,7 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PayakDB</title>
     <link rel="stylesheet" href="assets/css/style.css">
+
     <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="assets/js/components/card.js"></script>
+    <script src="assets/js/components/form.js"></script>
 </head>
 <body>
     <header>
