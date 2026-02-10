@@ -39,6 +39,7 @@ CREATE TABLE IF NOT EXISTS group_projects (
     id VARCHAR(36) PRIMARY KEY, -- UUIDs are 36-byte
     course_id VARCHAR(255) NOT NULL,
     name TEXT NOT NULL,
+    topic TEXT NOT NULL,
     description TEXT,
 
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
