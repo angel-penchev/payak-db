@@ -32,8 +32,8 @@
             </a>
 
             <nav class="flex items-center gap-4">
-                <animated-theme-toggler class="rounded" duration="500">
-                    A
+                <animated-theme-toggler class="rounded" duration="1000">
+                    AA
                 </animated-theme-toggler>
 
                 <?php if (isset($_SESSION['user_id'])) : ?>

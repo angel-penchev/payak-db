@@ -1,26 +1,16 @@
 <?php
-// config/db.php
-require_once 'config/db.php'; 
-
-$active_courses = [];
-$other_courses = [];
-
 try {
-    // UPDATED QUERY:
-    // We select all course data AND a count of enrollments for each course using a subquery.
-    // This assumes your enrollments table has a column 'course_id'
     $sql = "SELECT c.*, 
             (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) AS enrolled_count
             FROM courses c
             ORDER BY c.id DESC";
-            
+
     $stmt = $pdo->query($sql);
     $all_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // LOGIC: Split the courses
     // 1. Slice the first 2 for the top "Big Box" section
-    $temp_active = array_slice($all_courses, 0, 2);
-    
+    $active_courses = array_slice($all_courses, 0, 2);
+
     // 2. Slice the rest (starting from index 2) for the bottom list
     $other_courses = array_slice($all_courses, 2);
 
@@ -28,7 +18,7 @@ try {
         $stmt_proj = $pdo->prepare("SELECT * FROM group_projects WHERE course_id = ?");
         $stmt_proj->execute([$course['id']]);
         $projects = $stmt_proj->fetchAll(PDO::FETCH_ASSOC);
-        
+
         // Add the projects array to the course data so we can access it in the HTML
         $course['projects'] = $projects;
         $active_courses[] = $course;
@@ -39,216 +29,97 @@ try {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Course Dashboard</title>
-    <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            padding: 40px; 
-            background-color: #fff;
-            color: #333;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
+<main class="px-4 mx-auto max-w-[1450px]">
+    <div class="mb-8 text-center relative w-full">
+        <h1 class="text-2xl font-bold inline-flex items-center gap-4 before:content-[''] before:w-12 before:h-0.5 before:bg-primary after:content-[''] after:w-12 after:h-0.5 after:bg-primary">
+            Active Courses
+        </h1>
+    </div>
 
-        /* --- HEADERS --- */
-        .section-header {
-            text-align: center;
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            position: relative;
-        }
-        .section-header:before, .section-header:after {
-            content: "";
-            display: inline-block;
-            width: 50px;
-            height: 2px;
-            background: #333;
-            vertical-align: middle;
-            margin: 0 10px;
-        }
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+        <?php if (count($active_courses) > 0) : ?>
+            <?php foreach ($active_courses as $course) : ?>
+                <ui-card>
+                    <ui-card-header>
+                        <ui-card-title>
+                            <?php echo htmlspecialchars($course['display_name']); ?>
+                        </ui-card-title>
+                        <ui-card-description>
+                            Course ID: <?php echo htmlspecialchars($course['id']); ?>
+                        </ui-card-description>
+                    </ui-card-header>
 
-        /* --- TOP SECTION (GRID) --- */
-        .top-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr; /* Two equal columns */
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .big-card {
-            border: 2px solid #333;
-            border-radius: 8px;
-            padding: 20px;
-            background: #fff;
-            position: relative;
-            min-height: 150px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .big-card h2 {
-            margin: 0 0 5px 0;
-            font-size: 1.8em;
-        }
-
-        .tag {
-            color: #666;
-            font-size: 0.9em;
-            font-style: italic;
-        }
-
-        .card-footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 15px; /* Adds space between the icons */
-            align-items: center;
-        }
-
-        /* --- MIDDLE (CREATE BUTTON) --- */
-        .action-bar {
-            text-align: right;
-            margin: 20px 0;
-            border-top: 2px solid #333;
-            padding-top: 10px;
-            position: relative;
-        }
-        .action-bar span {
-            position: absolute;
-            left: 50%;
-            top: -12px;
-            background: #fff;
-            padding: 0 10px;
-            transform: translateX(-50%);
-            font-weight: bold;
-        }
-        
-        .btn-create {
-            display: inline-block;
-            border: 2px solid #d9534f;
-            color: #d9534f;
-            padding: 5px 15px;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: 0.3s;
-        }
-        .btn-create:hover {
-            background: #d9534f;
-            color: white;
-        }
-
-        /* --- BOTTOM LIST --- */
-        .list-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .list-card {
-            border: 2px solid #333;
-            padding: 15px;
-            border-radius: 6px;
-            display: flex;
-            justify-content: space-between; 
-            align-items: center;
-        }
-
-        .list-info h3 {
-            margin: 0;
-            font-size: 1.2em;
-        }
-        
-        .arrow-icon {
-            font-size: 1.5em;
-            font-weight: bold;
-        }
-
-        @media (max-width: 768px) {
-            .top-grid { grid-template-columns: 1fr; }
-        }
-    </style>
-</head>
-<body>
-
-    <div class="section-header">Active Courses</div>
-
-    <div class="top-grid">
-        <?php if (count($active_courses) > 0): ?>
-            <?php foreach ($active_courses as $course): ?>
-                <div class="big-card">
-                    <div>
-                        <a href="/payak-db/courses/<?php echo htmlspecialchars($course['id']); ?>" style="text-decoration:none; color:inherit;" target="_blank">
-                            <h2><?php echo htmlspecialchars($course['display_name']); ?></h2>
-                        </a>
-                        <div class="tag">
-                            ID: <?php echo htmlspecialchars($course['id']); ?>
+                    <ui-card-content class="flex-grow">
+                        <div class="flex items-center gap-2 text-2xl font-semibold text-primary">
+                            <span>👤</span>
+                            <span><?php echo htmlspecialchars($course['enrolled_count'] ?? 0); ?></span>
                         </div>
-                    </div>
-                    
-                    <div class="card-footer">
-                        <?php if (!empty($course['moodle_course_url'])): ?>
-                            <a href="<?php echo htmlspecialchars($course['moodle_course_url']); ?>" target="_blank" style="text-decoration:none;" >
-                                🔗 Moodle
+                        <p class="text-xs text-muted-foreground mt-1">Active Students</p>
+                    </ui-card-content>
+
+                    <ui-card-footer class="justify-between">
+                        <span class="text-xs text-muted-foreground">Status: Active</span>
+                        <?php if (!empty($course['moodle_course_url'])) : ?>
+                            <a href="<?php echo htmlspecialchars($course['moodle_course_url']); ?>" 
+                               target="_blank" 
+                               class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-9 px-4 py-2">
+                                Open Moodle 🔗
                             </a>
                         <?php endif; ?>
-                        
-                        <span>👤 <?php echo htmlspecialchars($course['enrolled_count'] ?? 0); ?> </span>
+                    </ui-card-footer>
+                </ui-card>
 
-                        <span>🌐 <?php echo count($course['projects'] ?? []); ?></span>
-                    </div>
-                </div>
             <?php endforeach; ?>
-        <?php else: ?>
-            <p>No active courses available.</p>
+        <?php else : ?>
+            <div class="col-span-2 text-center text-muted-foreground p-8 border rounded-xl border-dashed">
+                No active courses available.
+            </div>
         <?php endif; ?>
     </div>
 
 
-    <div class="action-bar">
-        <span>Other Courses</span>
-        <?php 
-        // Check if the session 'role' is set and matches 'admin'
-        // Note: Ensure you have session_start(); at the very top of your PHP file!
-        if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): 
-        ?>
-            <a href="/courses/<?php echo $course['id']; ?>/course-create" 
-              class="btn-create" 
-              target="_blank" 
-              rel="noopener noreferrer">
-              + Create Course
-            </a>
-        <?php endif; ?>
+    <div class="flex items-center justify-between border-t py-6 mt-6">
+        <span class="text-lg font-semibold tracking-tight">Other Courses</span>
+        <a href="#" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 text-red-500 border-red-200 hover:bg-red-50">
+            + Create Course
+        </a>
     </div>
 
 
-    <div class="list-container">
+    <div class="flex flex-col gap-3">
         <?php if (count($other_courses) > 0): ?>
             <?php foreach ($other_courses as $course): ?>
-                <div class="list-card">
-                    <div class="list-info">
-                        <h3><?php echo htmlspecialchars($course['display_name']); ?></h3>
-                        <div class="tag">
-                             ID: <?php echo htmlspecialchars($course['id']); ?>
+                
+                <ui-card size="sm">
+                    <ui-card-header>
+                        <div class="grid gap-0.5">
+                            <ui-card-title>
+                                <?php echo htmlspecialchars($course['display_name']); ?>
+                            </ui-card-title>
+                            <ui-card-description>
+                                ID: <?php echo htmlspecialchars($course['id']); ?>
+                            </ui-card-description>
                         </div>
-                    </div>
-                    
-                    <div class="arrow-icon">
-                        <a href="/payak-db/courses/<?php echo htmlspecialchars($course['id']); ?>" style="text-decoration:none; color:inherit;" target="_blank">
-                            &rarr;
-                        </a>
-                    </div>
-                </div>
+                        
+                        <ui-card-action>
+                            <?php if (!empty($course['moodle_course_url'])): ?>
+                                <a href="<?php echo htmlspecialchars($course['moodle_course_url']); ?>" 
+                                   class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-muted hover:bg-muted-foreground/20 transition-colors">
+                                    &rarr;
+                                </a>
+                            <?php else: ?>
+                                <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-muted/50 text-muted-foreground opacity-50 cursor-not-allowed">
+                                    &rarr;
+                                </span>
+                            <?php endif; ?>
+                        </ui-card-action>
+                    </ui-card-header>
+                </ui-card>
+
             <?php endforeach; ?>
-        <?php else: ?>
-            <p style="text-align:center; color:#999;">No other courses found.</p>
+        <?php else : ?>
+            <p class="text-center text-muted-foreground py-4">No other courses found.</p>
         <?php endif; ?>
     </div>
+</main>
 
-</body>
-</html>
