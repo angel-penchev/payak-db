@@ -8,6 +8,7 @@
 
     <script src="<?php echo BASE_URL; ?>/assets/js/script.js"></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/components/animated-theme-toggler.js" defer></script>
+    <script src="<?php echo BASE_URL; ?>/assets/js/components/avatar-generator.js" defer></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/components/card.js" defer></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/components/form.js" defer></script>
 
@@ -64,7 +65,7 @@
                     <a href="<?php echo BASE_URL; ?>/register" class="text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white hover:underline transition-all">
                         Registration
                     </a>
-                    
+
                     <a href="<?php echo BASE_URL; ?>/login" class="inline-flex items-center justify-center h-9 px-4 py-2 rounded-md bg-black text-white dark:bg-white dark:text-black text-sm font-medium hover:bg-black/90 dark:hover:bg-white/90 transition-colors shadow-sm">
                         Login
                     </a>
