@@ -154,7 +154,8 @@ try {
         <?php if (count($projects) > 0): ?>
             <?php foreach ($projects as $project): ?>
                 <div class="project-card">
-                    <h3><?php echo htmlspecialchars($project['name'] ?? 'Project Name'); ?></h3>
+                    <a href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/projects/<?php echo $project['id']; ?>" target="_blank"><h3><?php echo htmlspecialchars($project['name'] ?? 'Project Name'); ?></h3></a>
+                    
                     
                     <div class="user-icons">
                         <div class="user-circle">👤</div>
