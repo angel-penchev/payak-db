@@ -1,35 +1,43 @@
 <?php
 try {
+    // Get today's date
+    $today = date('Y-m-d');
+
+    // Fetch all courses with enrolled count
     $sql = "SELECT c.*, 
             (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) AS enrolled_count
             FROM courses c
-            ORDER BY c.id DESC";
+            ORDER BY c.opens_at_date DESC"; // Ordered by start date usually makes more sense here, but c.id is fine too
 
     $stmt = $pdo->query($sql);
     $all_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // 1. Slice the first 2 for the top "Big Box" section
-    $active_courses = array_slice($all_courses, 0, 2);
+    // Initialize arrays
+    $active_courses = [];
+    $other_courses = [];
 
-    // 2. Slice the rest (starting from index 2) for the bottom list
-    $other_courses = array_slice($all_courses, 2);
+    // Filter logic
+    foreach ($all_courses as $course) {
+        // Check if today is between start and end date (inclusive)
+        $isActive = ($today >= $course['opens_at_date'] && $today <= $course['closes_at_date']);
 
-    // Note: I fixed the variable name here from $temp_active to $active_courses
-    // to ensure the project fetching logic works correctly.
-    foreach ($active_courses as &$course) { 
-        $stmt_proj = $pdo->prepare("SELECT * FROM group_projects WHERE course_id = ?");
-        $stmt_proj->execute([$course['id']]);
-        $projects = $stmt_proj->fetchAll(PDO::FETCH_ASSOC);
-        $course['projects'] = $projects;
+        if ($isActive) {
+            // Fetch projects ONLY for active courses (optimization)
+            $stmt_proj = $pdo->prepare("SELECT * FROM group_projects WHERE course_id = ?");
+            $stmt_proj->execute([$course['id']]);
+            $course['projects'] = $stmt_proj->fetchAll(PDO::FETCH_ASSOC);
+
+            $active_courses[] = $course;
+        } else {
+            // All inactive courses go here
+            $other_courses[] = $course;
+        }
     }
-    unset($course); // Break reference
-
 } catch (PDOException $e) {
     die("Error fetching courses: " . $e->getMessage());
 }
-?>
 
-<main class="px-4 mx-auto max-w-[1450px]">
+?><main class="px-4 mx-auto max-w-[1450px]">
     <div class="mb-8 text-center relative w-full">
         <h1 class="text-2xl font-bold inline-flex items-center gap-4 before:content-[''] before:w-12 before:h-0.5 before:bg-primary after:content-[''] after:w-12 after:h-0.5 after:bg-primary">
             Active Courses
