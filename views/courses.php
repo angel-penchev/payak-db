@@ -37,14 +37,14 @@ try {
     die("Error fetching courses: " . $e->getMessage());
 }
 
-?><main class="px-4 mx-auto max-w-[1450px]">
+?><main class="px-4 mx-auto w-full max-w-6xl">
     <div class="mb-8 text-center relative w-full">
         <h1 class="text-2xl font-bold inline-flex items-center gap-4 before:content-[''] before:w-12 before:h-0.5 before:bg-primary after:content-[''] after:w-12 after:h-0.5 after:bg-primary">
             Active Courses
         </h1>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 auto-rows-fr">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10 auto-rows-fr w-full">
         <?php if (count($active_courses) > 0) : ?>
             <?php foreach ($active_courses as $course) : ?>
                 <ui-card class="relative group hover:shadow-lg transition-all duration-200 cursor-pointer min-h-[18rem] border-2 border-transparent hover:border-gray-100 flex flex-col">
@@ -116,14 +116,14 @@ try {
         <?php endif; ?>
     </div>
 
-    <div class="flex items-center justify-between border-t py-6 mt-6 mx-auto w-1/2">
+    <div class="flex items-center justify-between border-t p-4 mt-6 mx-auto w-full md:w-1/2">
         <span class="text-lg font-semibold tracking-tight">Other Courses</span>
         <a href="<?php echo BASE_URL; ?>/courses/course-create" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 text-red-500 border-red-200 hover:bg-red-50">
             + Create Course
         </a>
     </div>
 
-    <div class="flex flex-col gap-3 mx-auto w-1/2">
+    <div class="flex flex-col gap-3 mx-auto w-full md:w-1/2">
         <?php if (count($other_courses) > 0) : ?>
             <?php foreach ($other_courses as $course) : ?>
                 <ui-card size="sm" class="relative group transition-all duration-200 cursor-pointer border-2 border-transparent hover:border-gray-100 hover:shadow-lg">
