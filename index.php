@@ -65,7 +65,24 @@ switch ($request) {
         $view = 'views/404.php';
         break;
 }
+// --- index.php ---
 
+// ... (your switch/case logic stays the same) ...
+
+// Updated Rendering Logic
+// index.php rendering logic
+// if ($view) {
+//     if (isset($_GET['action'])) {
+//         // If an AJAX action is requested, ONLY load the view
+//         include $view;
+//         exit;
+//     } else {
+//         // Normal page load
+//         include 'includes/header.php';
+//         include $view;
+//         include 'includes/footer.php';
+//     }
+// }
 // Render the page
 if ($view) {
     include 'includes/header.php';
