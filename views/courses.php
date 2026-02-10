@@ -7,7 +7,7 @@ try {
     $sql = "SELECT c.*, 
             (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) AS enrolled_count
             FROM courses c
-            ORDER BY c.opens_at_date DESC"; // Ordered by start date usually makes more sense here, but c.id is fine too
+            ORDER BY c.opens_at_date DESC";
 
     $stmt = $pdo->query($sql);
     $all_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -36,8 +36,9 @@ try {
 } catch (PDOException $e) {
     die("Error fetching courses: " . $e->getMessage());
 }
+?>
 
-?><main class="px-4 mx-auto w-full max-w-6xl">
+<main class="px-4 mx-auto w-full max-w-6xl">
     <div class="mb-8 text-center relative w-full">
         <h1 class="text-2xl font-bold inline-flex items-center gap-4 before:content-[''] before:w-12 before:h-0.5 before:bg-primary after:content-[''] after:w-12 after:h-0.5 after:bg-primary">
             Active Courses
@@ -116,11 +117,23 @@ try {
         <?php endif; ?>
     </div>
 
-    <div class="flex items-center justify-between border-t p-4 mt-6 mx-auto w-full md:w-1/2">
+    <?php
+        // Check if user is admin
+        $isAdmin = (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin');
+
+        // Set alignment: 'justify-between' spreads them apart (Left/Right), 'justify-center' centers the text
+        $alignmentClass = $isAdmin ? 'justify-between' : 'justify-center';
+    ?>
+
+    <div class="flex items-center <?php echo $alignmentClass; ?> border-t py-4 mt-6 mx-auto w-full md:w-1/2">
         <span class="text-lg font-semibold tracking-tight">Other Courses</span>
-        <a href="<?php echo BASE_URL; ?>/courses/course-create" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 text-red-500 border-red-200 hover:bg-red-50">
-            + Create Course
-        </a>
+
+        <?php if ($isAdmin) : ?>
+            <ui-button href="<?php echo BASE_URL; ?>/courses/course-create" variant="outline" size="sm" class="gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                Create
+            </ui-button>
+        <?php endif; ?>
     </div>
 
     <div class="flex flex-col gap-3 mx-auto w-full md:w-1/2">

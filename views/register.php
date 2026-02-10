@@ -120,9 +120,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <ui-input type="password" name="confirm_password" required></ui-input>
                     </div>
 
-                    <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 mt-4 bg-black text-white hover:bg-black/90 dark:bg-white dark:text-black dark:hover:bg-white/90 ring-offset-white dark:ring-offset-gray-950 focus-visible:ring-gray-950 dark:focus-visible:ring-gray-300">
+                    <ui-button type="submit" class="w-full mt-4">
                         Register
-                    </button>
+                    </ui-button>
+
+                    <div class="mt-2 text-center text-sm">
+                        Already registered? 
+                        <a href="<?php echo BASE_URL; ?>/login" class="underline hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+                            Login
+                        </a>
+                    </div>
                 </form>
             </ui-card-content>
         </ui-card>
