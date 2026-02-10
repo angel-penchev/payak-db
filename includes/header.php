@@ -25,15 +25,15 @@
     </script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
-    <header class="border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-200">
+    <header class="border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-200 mb-8">
         <div class="container mx-auto px-4 h-16 flex items-center justify-between">
             <a href="<?php echo BASE_URL; ?>/" class="text-xl font-bold tracking-tight hover:opacity-80 transition">
                 PayakDB
             </a>
 
             <nav class="flex items-center gap-4">
-                <animated-theme-toggler class="rounded" duration="500">
-                    A
+                <animated-theme-toggler class="rounded" duration="1000">
+                    AA
                 </animated-theme-toggler>
 
                 <?php if (isset($_SESSION['user_id'])) : ?>

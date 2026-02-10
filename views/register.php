@@ -67,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <div class="flex justify-center items-center min-h-[calc(100vh-200px)] py-10">
     <div class="w-full max-w-lg">
-        
+
         <?php if ($success) : ?>
             <div class="mb-4 p-4 bg-green-50 text-green-700 rounded-lg border border-green-200 text-sm">
                 <?php echo $success; ?>
@@ -88,13 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <ui-card-content>
                 <form method="POST" action="" class="grid gap-4">
-                    
                     <div class="grid grid-cols-2 gap-4">
                         <div class="grid gap-2">
                             <ui-label>First Name</ui-label>
                             <ui-input 
-                                name="first_name" 
-                                placeholder="Gosho" 
+                                name="first_name"
+                                placeholder="Gosho"
                                 value="<?php echo htmlspecialchars($_POST['first_name'] ?? ''); ?>"
                                 required>
                             </ui-input>
@@ -102,8 +101,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="grid gap-2">
                             <ui-label>Last Name</ui-label>
                             <ui-input 
-                                name="last_name" 
-                                placeholder="Losho" 
+                                name="last_name"
+                                placeholder="Losho"
                                 value="<?php echo htmlspecialchars($_POST['last_name'] ?? ''); ?>"
                                 required>
                             </ui-input>
@@ -122,10 +121,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="grid gap-2">
                         <ui-label>University Email</ui-label>
-                        <ui-input 
-                            type="email" 
-                            name="university_email" 
-                            placeholder="glosho1@uni-sofia.bg" 
+                        <ui-input
+                            type="email"
+                            name="university_email"
+                            placeholder="glosho1@uni-sofia.bg"
                             value="<?php echo htmlspecialchars($_POST['university_email'] ?? ''); ?>"
                             required>
                         </ui-input>
@@ -133,9 +132,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                     <div class="grid gap-2">
                         <ui-label>Password</ui-label>
-                        <ui-input 
-                            type="password" 
-                            name="password" 
+                        <ui-input
+                            type="password"
+                            name="password"
                             required>
                         </ui-input>
                     </div>
@@ -149,7 +148,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </ui-input>
                     </div>
 
-                    <button type="submit" class="inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-black text-white hover:bg-black/90 h-10 px-4 py-2 mt-4">
+                   <button 
+                      type="submit" 
+                      class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-10 px-4 py-2 mt-4 
+                      bg-black text-white hover:bg-black/90 
+                      dark:bg-white dark:text-black dark:hover:bg-white/90
+                      ring-offset-white dark:ring-offset-gray-950 focus-visible:ring-gray-950 dark:focus-visible:ring-gray-300">
                         Register
                     </button>
                 </form>
