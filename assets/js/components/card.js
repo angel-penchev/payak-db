@@ -11,7 +11,7 @@ class UICard extends HTMLElement {
     const size = this.getAttribute('size') || 'default';
     this.setAttribute('data-size', size);
 
-    addClasses(this, "bg-white dark:bg-gray-900 text-gray-950 dark:text-gray-50 ring-1 ring-gray-200 dark:ring-gray-800 gap-4 overflow-hidden rounded-xl pt-4 text-sm has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col shadow-sm");
+    addClasses(this, "bg-white dark:bg-gray-900 text-gray-950 dark:text-gray-50 ring-1 ring-gray-200 dark:ring-gray-800 gap-4 overflow-hidden rounded-xl py-4 text-sm has-data-[slot=card-footer]:pb-0 has-[>img:first-child]:pt-0 data-[size=sm]:gap-3 data-[size=sm]:py-3 data-[size=sm]:has-data-[slot=card-footer]:pb-0 *:[img:first-child]:rounded-t-xl *:[img:last-child]:rounded-b-xl group/card flex flex-col shadow-sm");
   }
 }
 
