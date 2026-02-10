@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,7 +27,7 @@
     </script>
 </head>
 <body class="bg-gray-50 dark:bg-gray-950 text-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-200">
-    <header class="border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-200 mb-8">
+    <header class="border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50 transition-colors duration-200 mb-8 bg-white/80 dark:bg-gray-950/80 backdrop-blur-md">
         <div class="container mx-auto px-4 h-16 flex items-center justify-between">
             <a href="<?php echo BASE_URL; ?>/" class="text-xl font-bold tracking-tight hover:opacity-80 transition">
                 PayakDB
@@ -43,11 +44,15 @@
                             <?php echo htmlspecialchars($_SESSION['user_name'] ?? 'User'); ?>
                         </span>
 
-                        <div class="h-9 w-9 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-700">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600 dark:text-gray-400">
-                                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
+                        <div class="h-9 w-9 rounded-full flex items-center justify-center border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 overflow-hidden">
+                            <?php if (!empty($_SESSION['user_avatar'])): ?>
+                                <img src="<?php echo htmlspecialchars($_SESSION['user_avatar']); ?>" alt="Avatar" class="h-full w-full object-cover">
+                            <?php else: ?>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-gray-600 dark:text-gray-400">
+                                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                                    <circle cx="12" cy="7" r="4"></circle>
+                                </svg>
+                            <?php endif; ?>
                         </div>
                     </div>
 

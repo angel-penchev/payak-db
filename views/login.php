@@ -11,8 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Please enter both email and password.";
     } else {
         try {
-            // Fetch User by Email
-            $stmt = $pdo->prepare("SELECT id, first_name, last_name, password_hash, user_role FROM users WHERE university_email = :email");
+            $stmt = $pdo->prepare("SELECT id, first_name, last_name, password_hash, user_role, avatar_url FROM users WHERE university_email = :email");
             $stmt->execute([':email' => $email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -27,6 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user_id'] = $user['id'];
                 $_SESSION['user_name'] = $user['first_name'] . ' ' . $user['last_name'];
                 $_SESSION['user_role'] = $user['user_role'];
+                $_SESSION['user_avatar'] = $user['avatar_url'];
 
                 // Redirect to Home
                 header("Location: " . BASE_URL . "/");
@@ -39,9 +39,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-?>
 
-<div class="flex justify-center items-center min-h-[calc(100vh-200px)] py-10">
+?><div class="flex justify-center items-center min-h-[calc(100vh-200px)] py-10">
     <div class="w-full max-w-md">
 
         <?php if ($error) : ?>
