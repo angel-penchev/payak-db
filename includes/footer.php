@@ -1,3 +1,4 @@
+    </main>
     <footer class="mt-auto border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-950/50 backdrop-blur-sm py-8 transition-colors duration-200">
         <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-center md:text-left">
