@@ -32,6 +32,10 @@ switch ($request) {
         header("Location: " . BASE_URL . "/login");
         exit;
 
+    case 'users':
+        $view = 'views/users_list.php';
+        break;
+
     // --- Route: Create Course ---
     case 'courses/course-create':
         $view = 'views/course_modify.php';
