@@ -52,7 +52,7 @@ class ProjectBanner extends HTMLElement {
            <img 
               src="${avatarSrc}" 
               alt="${fullName}"
-              class="h-40 w-40 md:h-44 md:w-44 drop-shadow-xl object-contain block"
+              class="w-40 h-40 lg:w-44 lg:h-44 drop-shadow-xl object-contain block"
               onerror="this.style.display='none'"
            >
         </div>
