@@ -204,7 +204,7 @@ if (!$current_course) {
     <?php if (count($projects) > 0) : ?>
         <?php foreach ($projects as $project) : ?>
             <ui-card 
-                class="project-card-item group flex flex-col rounded-xl border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 hover:shadow-2xl relative cursor-pointer !py-0 !overflow-visible"
+                class="project-card-item group flex flex-col rounded-xl border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 hover:shadow-2xl relative cursor-pointer !py-0 !overflow-visible !gap-0"
                 data-searchable="<?php echo htmlspecialchars(strtolower($project['name'] . ' ' . ($project['topic'] ?? '') . ' ' . ($project['description'] ?? ''))); ?>"
             >
                 <div class="w-full aspect-[21/9] bg-gray-100 dark:bg-gray-900 relative rounded-t-xl z-20 pointer-events-none">
