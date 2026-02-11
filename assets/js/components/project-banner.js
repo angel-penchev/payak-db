@@ -18,7 +18,6 @@ class ProjectBanner extends HTMLElement {
 
     this.innerHTML = `
       <div class="relative w-full h-full bg-gray-900 rounded-t-xl overflow-visible select-none">
-        
         <div 
           class="absolute inset-0 flex flex-col w-full h-full pt-6 items-center text-center text-white overflow-visible rounded-t-xl"
           style="background-color: ${this.color};"
@@ -53,7 +52,7 @@ class ProjectBanner extends HTMLElement {
            <img 
               src="${avatarSrc}" 
               alt="${fullName}"
-              class="h-20 w-20 md:h-24 md:w-24 drop-shadow-xl object-contain block"
+              class="h-40 w-40 md:h-44 md:w-44 drop-shadow-xl object-contain block"
               onerror="this.style.display='none'"
            >
         </div>
