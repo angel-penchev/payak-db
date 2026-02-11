@@ -13,6 +13,8 @@
     <script src="<?php echo BASE_URL; ?>/assets/js/components/button.js" defer></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/components/card.js" defer></script>
     <script src="<?php echo BASE_URL; ?>/assets/js/components/form.js" defer></script>
+    <script src="<?php echo BASE_URL; ?>/assets/js/components/hover-card.js" defer></script>
+    <script src="<?php echo BASE_URL; ?>/assets/js/components/project-banner.js" defer></script>
 
     <link rel="stylesheet" href="<?php echo BASE_URL; ?>/assets/css/style.css">
 
