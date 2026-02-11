@@ -1,9 +1,7 @@
 <?php
 try {
-    // Get today's date
     $today = date('Y-m-d');
 
-    // Fetch all courses with enrolled count
     $sql = "SELECT c.*, 
             (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) AS enrolled_count
             FROM courses c
@@ -12,17 +10,16 @@ try {
     $stmt = $pdo->query($sql);
     $all_courses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Initialize arrays
     $active_courses = [];
     $other_courses = [];
 
     // Filter logic
     foreach ($all_courses as $course) {
-        // Check if today is between start and end date (inclusive)
+        // Check if today is between start and end date
         $isActive = ($today >= $course['opens_at_date'] && $today <= $course['closes_at_date']);
 
         if ($isActive) {
-            // Fetch projects ONLY for active courses (optimization)
+            // Fetch projects ONLY for active courses
             $stmt_proj = $pdo->prepare("SELECT * FROM group_projects WHERE course_id = ?");
             $stmt_proj->execute([$course['id']]);
             $course['projects'] = $stmt_proj->fetchAll(PDO::FETCH_ASSOC);

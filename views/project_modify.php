@@ -29,8 +29,6 @@ $pDesc = '';
 $pZipPath = '';
 $teamMembers = []; 
 
-// 2. FETCH EXISTING DATA
-// ---------------------------------------------------------
 if ($isEditMode && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     $stmt = $pdo->prepare("SELECT * FROM group_projects WHERE id = ?");
     $stmt->execute([$projectId]);
@@ -61,19 +59,14 @@ if ($isEditMode && $_SERVER['REQUEST_METHOD'] !== 'POST') {
     $teamMembers = array_values(array_diff($mems, [$myFn]));
 }
 
-// 3. HANDLE FORM SUBMISSION
-// ---------------------------------------------------------
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pName = trim($_POST['name'] ?? '');
     $pTopic = trim($_POST['topic'] ?? '');
     $pDesc = trim($_POST['description'] ?? '');
-    
     $candidates = $_POST['members'] ?? [];
     $teamMembers = $candidates; 
-    
     $finalTeam = [$myFn];
 
-    // ... (Member Validation Logic remains the same) ...
     foreach ($candidates as $fn) {
         $fn = trim($fn);
         if (!empty($fn)) {
@@ -89,27 +82,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Project Name and Topic are required.";
     }
 
-    // --- NEW: FILE UPLOAD LOGIC ---
     $uploadedFilePath = null;
-    
     if (!$error && isset($_FILES['source_code']) && $_FILES['source_code']['error'] === UPLOAD_ERR_OK) {
         $fileTmpPath = $_FILES['source_code']['tmp_name'];
         $fileName = $_FILES['source_code']['name'];
         $fileSize = $_FILES['source_code']['size'];
         $fileType = $_FILES['source_code']['type'];
-        
         $fileNameCmps = explode(".", $fileName);
         $fileExtension = strtolower(end($fileNameCmps));
 
         // Validate Extension
         if ($fileExtension !== 'zip') {
             $error = "Only .zip files are allowed.";
-        }
-        // Validate Size (e.g., max 10MB)
-        elseif ($fileSize > 10 * 1024 * 1024) {
+        } elseif ($fileSize > 10 * 1024 * 1024) {
             $error = "File size exceeds 10MB limit.";
-        }
-        else {
+        } else {
             // Setup Upload Directory
             $uploadFileDir = 'uploads/projects/';
             if (!is_dir($uploadFileDir)) {
@@ -129,9 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-    // ------------------------------
 
-    // SAVE TO DB
     if (!$error) {
         try {
             $pdo->beginTransaction();
@@ -274,7 +259,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-    // Include the same script block for adding members as before
     function updateCounters() {
         let count = 2; 
         document.querySelectorAll('.member-item .counter').forEach(el => { el.innerText = count++; });

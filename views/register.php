@@ -66,7 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':email'  => $email,
                 ':phash'  => $passwordHash,
                 ':avatar' => $avatarUrl,
-                ':role'   => $role  // Save the determined role
+                ':role'   => $role
             ]);
 
             $success = "Registration successful! You can now login.";
@@ -161,6 +161,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
+    // This is terrible. DON'T! (but too bad...)
     // Capture avatar data
     const avatarGen = document.getElementById('avatarGen');
     const avatarInput = document.getElementById('avatarInput');

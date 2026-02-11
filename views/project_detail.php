@@ -36,7 +36,7 @@ try {
             ");
             $stmt_members->execute([$projectId]);
             $members = $stmt_members->fetchAll(PDO::FETCH_ASSOC);
-            
+
             // Assign color for the banner
             $project['color'] = stringToColor($project['name']);
         }

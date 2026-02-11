@@ -71,7 +71,7 @@ try {
             <?php echo $success; ?>
         </div>
     <?php endif; ?>
-    <?php if ($error) :w: ?>
+    <?php if ($error) : ?>
         <div class="mb-6 p-4 bg-red-50 text-red-700 rounded-lg border border-red-200 text-sm font-medium flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <?php echo $error; ?>
@@ -93,7 +93,7 @@ try {
                 <div class="flex-grow text-center md:text-left">
                     <h3 class="font-bold text-lg leading-none mb-1">
                         <?php echo htmlspecialchars($user['first_name'] . ' ' . $user['last_name']); ?>
-                        <?php if ($user['id'] === $current_user_id): ?>
+                        <?php if ($user['id'] === $current_user_id) : ?>
                             <span class="ml-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">You</span>
                         <?php endif; ?>
                     </h3>
