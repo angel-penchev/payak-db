@@ -1,6 +1,9 @@
 -- Disable foreign key checks to prevent errors during import order
 SET FOREIGN_KEY_CHECKS = 0;
 
+-- Add unicode support to columns
+ALTER DATABASE payak_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS users (
     id VARCHAR(36) PRIMARY KEY, -- UUIDs are 36-byte
     first_name TEXT NOT NULL,
