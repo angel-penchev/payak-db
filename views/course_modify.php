@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) session_start();
 
 // Redirect to Home if user is not logged in or not an Admin
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
-    header("Location: " . BASE_URL . "/");
+    echo "<script>window.location.href = '" . BASE_URL . "/';</script>";
     exit;
 }
 
@@ -12,6 +12,7 @@ $current_user_id = $_SESSION['user_id'] ?? null;
 $error = '';
 $success = '';
 $createdId = '';
+
 $isEditMode = isset($courseId) && !empty($courseId);
 $courseData = [];
 
@@ -29,17 +30,27 @@ if ($isEditMode) {
     }
 }
 
+// 3. HANDLE FORM SUBMISSION
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['display_name'] ?? '');
     $moodle = trim($_POST['moodle_url'] ?? '');
     $open = $_POST['opens_at'] ?? '';
     $close = $_POST['closes_at'] ?? '';
+    
+    // NEW: Team Size Limits
+    $minUsers = (int)($_POST['min_users'] ?? 1);
+    $maxUsers = (int)($_POST['max_users'] ?? 3);
+
     $targetId = $isEditMode ? $courseId : trim($_POST['id'] ?? '');
 
     if (empty($name) || empty($moodle) || empty($open) || empty($close) || empty($targetId)) {
         $error = "All fields are required.";
     } elseif ($close < $open) {
         $error = "Closing date cannot be earlier than opening date.";
+    } elseif ($minUsers < 1 || $maxUsers < 1) {
+        $error = "Team sizes must be at least 1.";
+    } elseif ($minUsers > $maxUsers) {
+        $error = "Minimum team size cannot be larger than maximum size.";
     } else {
         try {
             if ($isEditMode) {
@@ -47,45 +58,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         display_name = :name, 
                         moodle_course_url = :moodle, 
                         opens_at_date = :open, 
-                        closes_at_date = :close 
+                        closes_at_date = :close,
+                        min_users_per_project = :min_users,
+                        max_users_per_project = :max_users
                         WHERE id = :cid";
                 
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
-                    ':name'   => $name,
-                    ':moodle' => $moodle,
-                    ':open'   => $open,
-                    ':close'  => $close,
-                    ':cid'    => $targetId
+                    ':name'      => $name,
+                    ':moodle'    => $moodle,
+                    ':open'      => $open,
+                    ':close'     => $close,
+                    ':min_users' => $minUsers,
+                    ':max_users' => $maxUsers,
+                    ':cid'       => $targetId
                 ]);
                 
                 $success = "Course updated successfully!";
-                $createdId = $targetId; // For the link
+                $createdId = $targetId;
                 
+                // Update local data for view
                 $courseData['display_name'] = $name;
                 $courseData['moodle_course_url'] = $moodle;
                 $courseData['opens_at_date'] = $open;
                 $courseData['closes_at_date'] = $close;
+                $courseData['min_users_per_project'] = $minUsers;
+                $courseData['max_users_per_project'] = $maxUsers;
+
             } else {
-                $sql = "INSERT INTO courses (id, display_name, moodle_course_url, opens_at_date, closes_at_date, owner_id) 
-                        VALUES (:cid, :name, :moodle, :open, :close, :owner)";
+                // INSERT
+                $sql = "INSERT INTO courses (id, display_name, moodle_course_url, opens_at_date, closes_at_date, min_users_per_project, max_users_per_project, owner_id) 
+                        VALUES (:cid, :name, :moodle, :open, :close, :min_users, :max_users, :owner)";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([
-                    ':cid'    => $targetId,
-                    ':name'   => $name,
-                    ':moodle' => $moodle,
-                    ':open'   => $open,
-                    ':close'  => $close,
-                    ':owner'  => $current_user_id
+                    ':cid'       => $targetId,
+                    ':name'      => $name,
+                    ':moodle'    => $moodle,
+                    ':open'      => $open,
+                    ':close'     => $close,
+                    ':min_users' => $minUsers,
+                    ':max_users' => $maxUsers,
+                    ':owner'     => $current_user_id
                 ]);
 
                 $success = "Course created successfully!";
-                $createdId = $targetId; // For the link
-                $_POST = [];
+                $createdId = $targetId;
+                $_POST = []; 
             }
         } catch (PDOException $e) {
             if ($e->getCode() == 23000) {
-                $error = "A course with this ID or Moodle URL already exists.";
+                $error = "A course with this ID already exists.";
             } else {
                 $error = "Database error: " . $e->getMessage();
             }
@@ -93,11 +115,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
+// Prepare values (Post > DB > Default)
 $valId     = $_POST['id'] ?? ($courseData['id'] ?? '');
 $valName   = $_POST['display_name'] ?? ($courseData['display_name'] ?? '');
 $valMoodle = $_POST['moodle_url'] ?? ($courseData['moodle_course_url'] ?? '');
 $valOpen   = $_POST['opens_at'] ?? ($courseData['opens_at_date'] ?? '');
 $valClose  = $_POST['closes_at'] ?? ($courseData['closes_at_date'] ?? '');
+$valMin    = $_POST['min_users'] ?? ($courseData['min_users_per_project'] ?? 1);
+$valMax    = $_POST['max_users'] ?? ($courseData['max_users_per_project'] ?? 3);
 
 $pageTitle = $isEditMode ? 'Edit Course' : 'Create Course';
 ?>
@@ -146,14 +171,14 @@ $pageTitle = $isEditMode ? 'Edit Course' : 'Create Course';
                         </div>
                         <div class="grid gap-2 col-span-1">
                             <ui-label>Course ID</ui-label>
-                            <?php if ($isEditMode) : ?>
+                            <?php if ($isEditMode): ?>
                                 <ui-input 
                                     value="<?php echo htmlspecialchars($valId); ?>"
                                     disabled 
                                     class="opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800 pointer-events-none shadow-none">
                                 </ui-input>
                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($valId); ?>">
-                            <?php else : ?>
+                            <?php else: ?>
                                 <ui-input 
                                     name="id"
                                     placeholder="w25-2025"
@@ -180,6 +205,29 @@ $pageTitle = $isEditMode ? 'Edit Course' : 'Create Course';
                                 type="date"
                                 name="closes_at"
                                 value="<?php echo htmlspecialchars($valClose); ?>"
+                                required>
+                            </ui-input>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="grid gap-2">
+                            <ui-label>Min Users / Project</ui-label>
+                            <ui-input 
+                                type="number"
+                                name="min_users"
+                                min="1"
+                                value="<?php echo htmlspecialchars($valMin); ?>"
+                                required>
+                            </ui-input>
+                        </div>
+                        <div class="grid gap-2">
+                            <ui-label>Max Users / Project</ui-label>
+                            <ui-input 
+                                type="number"
+                                name="max_users"
+                                min="1"
+                                value="<?php echo htmlspecialchars($valMax); ?>"
                                 required>
                             </ui-input>
                         </div>
