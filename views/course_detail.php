@@ -1,5 +1,4 @@
 <?php
-// config/db.php is assumed to be included by the router
 require_once 'config/db.php';
 
 // Helper: Generate consistent color from string
@@ -9,11 +8,43 @@ function stringToColor($str) {
     return $colors[hexdec(substr($hash, 0, 1)) % count($colors)];
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'enroll') {
+    // Ensure user is logged in and courseId exists
+    if (isset($_SESSION['user_id']) && isset($courseId)) {
+        try {
+            // Check if already enrolled to avoid duplicates
+            $checkStmt = $pdo->prepare("SELECT 1 FROM enrollments WHERE student_id = ? AND course_id = ?");
+            $checkStmt->execute([$_SESSION['user_id'], $courseId]);
+
+            if (!$checkStmt->fetchColumn()) {
+                // Insert new enrollment using MySQL UUID()
+                $enrollStmt = $pdo->prepare("
+                    INSERT INTO enrollments (id, student_id, course_id, grade) 
+                    VALUES (UUID(), ?, ?, NULL)
+                ");
+                $enrollStmt->execute([$_SESSION['user_id'], $courseId]);
+            }
+
+            echo "<script>window.location.href = window.location.href;</script>";
+            exit;
+
+        } catch (PDOException $e) {
+            die("Enrollment Error: " . $e->getMessage());
+        }
+    }
+}
+
 $current_course = null;
 $projects = [];
 
+$userId = $_SESSION['user_id'] ?? null;
+$userRole = '';
+$isEnrolled = false;
+$hasProjectInCourse = false;
+
 try {
     if (isset($courseId) && $courseId > 0) {
+        // 1. Fetch Course Details
         $stmt = $pdo->prepare("
             SELECT c.*, 
             (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) AS enrolled_count
@@ -23,6 +54,30 @@ try {
         $stmt->execute([$courseId]);
         $current_course = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // Fetch User Status (If logged in)
+        if ($userId) {
+            // Get Role
+            $stmtUser = $pdo->prepare("SELECT user_role FROM users WHERE id = ?");
+            $stmtUser->execute([$userId]);
+            $userRole = $stmtUser->fetchColumn();
+
+            // Check Enrollment
+            $stmtEnroll = $pdo->prepare("SELECT 1 FROM enrollments WHERE student_id = ? AND course_id = ?");
+            $stmtEnroll->execute([$userId, $courseId]);
+            $isEnrolled = (bool)$stmtEnroll->fetchColumn();
+
+            // Check if user is already in a project for this specific course
+            $stmtProjCheck = $pdo->prepare("
+                SELECT 1 
+                FROM group_project_members gpm
+                JOIN group_projects gp ON gpm.group_project_id = gp.id
+                WHERE gpm.student_id = ? AND gp.course_id = ?
+            ");
+            $stmtProjCheck->execute([$userId, $courseId]);
+            $hasProjectInCourse = (bool)$stmtProjCheck->fetchColumn();
+        }
+
+        // Fetch Projects
         $stmt_proj = $pdo->prepare("SELECT * FROM group_projects WHERE course_id = ?");
         $stmt_proj->execute([$courseId]);
         $raw_projects = $stmt_proj->fetchAll(PDO::FETCH_ASSOC);
@@ -35,7 +90,7 @@ try {
                 WHERE gpm.group_project_id = ?
             ");
             $stmt_mem->execute([$p['id']]);
-            
+
             $p['members'] = $stmt_mem->fetchAll(PDO::FETCH_ASSOC);
             $p['color'] = stringToColor($p['name']);
             $projects[] = $p;
@@ -115,10 +170,25 @@ if (!$current_course) {
             >
         </div>
 
-        <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" class="gap-2 whitespace-nowrap">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-            Create Project
-        </ui-button>
+        <?php if ($userRole === 'student') : ?>
+            <?php if (!$isEnrolled) : ?>
+                <form action="" method="POST">
+                    <input type="hidden" name="action" value="enroll">
+                    <ui-button type="submit" class="gap-2 whitespace-nowrap bg-green-600 hover:bg-green-700 text-white">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        Enroll in Course
+                    </ui-button>
+                </form>
+
+            <?php elseif ($isEnrolled && !$hasProjectInCourse) : ?>
+                <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" class="gap-2 whitespace-nowrap">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                    Create Project
+                </ui-button>
+
+            <?php endif; ?>
+
+        <?php endif; ?>
     </div>
 </div>
 
@@ -178,9 +248,14 @@ if (!$current_course) {
     <?php else : ?>
         <div class="col-span-full py-16 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
             <h3 class="text-xl font-bold">No projects yet</h3>
-            <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" variant="outline" class="mt-4">
-                Create Project
-            </ui-button>
+            
+            <?php 
+            if ($userRole === 'student' && $isEnrolled && !$hasProjectInCourse): 
+            ?>
+                <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" variant="outline" class="mt-4">
+                    Create Project
+                </ui-button>
+            <?php endif; ?>
         </div>
     <?php endif; ?>
 </div>
@@ -216,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (projectCountLabel) {
                     projectCountLabel.textContent = visibleCount;
                 }
-            }, 250); 
+            }, 250);
         });
     }
 });
