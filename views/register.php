@@ -1,6 +1,17 @@
 <?php
 require_once 'config/db.php';
 
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// If user is already logged in, send them home
+if (isset($_SESSION['user_id'])) {
+    header("Location: " . BASE_URL . "/");
+    exit;
+}
+
 $error = '';
 $success = '';
 
@@ -12,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['university_email'] ?? '');
     $pass = $_POST['password'] ?? '';
     $passConfirm = $_POST['confirm_password'] ?? '';
-    $avatarUrl = $_POST['avatar_url'] ?? ''; 
+    $avatarUrl = $_POST['avatar_url'] ?? '';
 
     if (empty($firstName) || empty($lastName) || empty($facultyNum) || empty($email) || empty($pass)) {
         $error = "All fields are required.";
@@ -20,27 +31,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Passwords do not match.";
     } else {
         try {
-            $uuid = sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff),
-                mt_rand(0, 0x0fff) | 0x4000, mt_rand(0, 0x3fff) | 0x8000,
-                mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff)
+            // Generate UUID
+            $uuid = sprintf(
+                '%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0x0fff) | 0x4000,
+                mt_rand(0, 0x3fff) | 0x8000,
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff),
+                mt_rand(0, 0xffff)
             );
 
             $passwordHash = password_hash($pass, PASSWORD_DEFAULT);
 
-            // Use the $avatarUrl captured from the hidden input
-            $sql = "INSERT INTO users (id, first_name, last_name, faculty_number, university_email, password_hash, avatar_url) 
-                    VALUES (:id, :fname, :lname, :fnum, :email, :phash, :avatar)";
+            // Check if this is the first user
+            $countStmt = $pdo->query("SELECT COUNT(*) FROM users");
+            $userCount = $countStmt->fetchColumn();
+
+            // If count is 0, role is 'admin', otherwise 'student'
+            $role = ($userCount == 0) ? 'admin' : 'student';
+
+            // Insert User (Now including user_role)
+            $sql = "INSERT INTO users (id, first_name, last_name, faculty_number, university_email, password_hash, avatar_url, user_role) 
+                    VALUES (:id, :fname, :lname, :fnum, :email, :phash, :avatar, :role)";
 
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
-                ':id' => $uuid,
-                ':fname' => $firstName,
-                ':lname' => $lastName,
-                ':fnum' => $facultyNum,
-                ':email' => $email,
-                ':phash' => $passwordHash,
-                ':avatar' => $avatarUrl
+                ':id'     => $uuid,
+                ':fname'  => $firstName,
+                ':lname'  => $lastName,
+                ':fnum'   => $facultyNum,
+                ':email'  => $email,
+                ':phash'  => $passwordHash,
+                ':avatar' => $avatarUrl,
+                ':role'   => $role  // Save the determined role
             ]);
 
             $success = "Registration successful! You can now login.";
@@ -55,8 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 ?>
-
-<script type="module" src="<?php echo BASE_URL; ?>/assets/js/components/avatar-generator.js"></script>
 
 <div class="flex justify-center items-center min-h-[calc(100vh-200px)] py-10">
     <div class="w-full max-w-2xl"> 
@@ -125,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </ui-button>
 
                     <div class="mt-2 text-center text-sm">
-                        Already registered? 
+                        Already registered?
                         <a href="<?php echo BASE_URL; ?>/login" class="underline hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
                             Login
                         </a>
@@ -137,17 +161,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script>
-    // Robust logic to capture avatar data
+    // Capture avatar data
     const avatarGen = document.getElementById('avatarGen');
     const avatarInput = document.getElementById('avatarInput');
 
     if (avatarGen && avatarInput) {
-        // 1. Listen for updates (when user clicks arrows)
+        // Listen for updates (when user clicks arrows)
         avatarGen.addEventListener('avatar-generated', (e) => {
             avatarInput.value = e.detail.dataUri;
         });
 
-        // 2. Capture initial state
+        // Capture initial state
         // We poll briefly until the Web Component hydrates and sets its value
         const checkValue = setInterval(() => {
             if (avatarGen.getAttribute('value')) {
@@ -155,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 clearInterval(checkValue);
             }
         }, 100);
-        
+
         // Timeout to stop polling after 2 seconds
         setTimeout(() => clearInterval(checkValue), 2000);
     }
