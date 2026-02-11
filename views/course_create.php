@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <ui-label>Course Name</ui-label>
                             <ui-input 
                                 name="display_name"
-                                placeholder="Advanced Web Applications"
+                                placeholder="Web технологии, зимен семестър 2025/2026"
                                 value="<?php echo htmlspecialchars($_POST['display_name'] ?? ''); ?>"
                                 required>
                             </ui-input>
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <ui-label>Course ID</ui-label>
                             <ui-input 
                                 name="id"
-                                placeholder="CS101"
+                                placeholder="w25-2025-2026"
                                 value="<?php echo htmlspecialchars($_POST['id'] ?? ''); ?>"
                                 required>
                             </ui-input>
@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <ui-input
                             type="url"
                             name="moodle_url"
-                            placeholder="https://moodle.uni-sofia.bg/course/view.php?id=..."
+                            placeholder="https://learn.fmi.uni-sofia.bg/course/view.php?id=..."
                             value="<?php echo htmlspecialchars($_POST['moodle_url'] ?? ''); ?>"
                             required>
                         </ui-input>
