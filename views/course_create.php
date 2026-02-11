@@ -2,6 +2,12 @@
 require_once 'config/db.php';
 if (session_status() === PHP_SESSION_NONE) session_start();
 
+// Redirect to Home if user is not logged in or not an Admin
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_role']) || $_SESSION['user_role'] !== 'admin') {
+    header("Location: " . BASE_URL . "/");
+    exit;
+}
+
 $current_user_id = $_SESSION['user_id'] ?? null;
 $error = '';
 $success = '';
