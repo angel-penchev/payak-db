@@ -2,10 +2,9 @@
 // config/db.php is assumed to be included by the router
 require_once 'config/db.php';
 
-// Helper: Generate consistent pastel/vibrant color from string
+// Helper: Generate consistent color from string
 function stringToColor($str) {
     $hash = md5($str);
-    // A palette of nice colors for banners
     $colors = ['#0f172a', '#1e1b4b', '#4a044e', '#450a0a', '#064e3b', '#172554', '#312e81', '#881337'];
     return $colors[hexdec(substr($hash, 0, 1)) % count($colors)];
 }
@@ -15,7 +14,6 @@ $projects = [];
 
 try {
     if (isset($courseId) && $courseId > 0) {
-        // 1. Fetch Course Details
         $stmt = $pdo->prepare("
             SELECT c.*, 
             (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) AS enrolled_count
@@ -25,15 +23,11 @@ try {
         $stmt->execute([$courseId]);
         $current_course = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        // 2. Fetch Projects
         $stmt_proj = $pdo->prepare("SELECT * FROM group_projects WHERE course_id = ?");
         $stmt_proj->execute([$courseId]);
         $raw_projects = $stmt_proj->fetchAll(PDO::FETCH_ASSOC);
 
-        // 3. Process Projects (Get REAL Members & Colors)
         foreach ($raw_projects as $p) {
-            
-            // Query: Fetch members from group_project_members joined with users
             $stmt_mem = $pdo->prepare("
                 SELECT u.id, u.first_name, u.last_name, u.avatar_url, u.faculty_number 
                 FROM group_project_members gpm 
@@ -43,7 +37,7 @@ try {
             $stmt_mem->execute([$p['id']]);
             
             $p['members'] = $stmt_mem->fetchAll(PDO::FETCH_ASSOC);
-            $p['color'] = stringToColor($p['name']); // Generate specific color
+            $p['color'] = stringToColor($p['name']);
             $projects[] = $p;
         }
     }
@@ -51,7 +45,6 @@ try {
     die("Database Error: " . $e->getMessage());
 }
 
-// Redirect if invalid course
 if (!$current_course) {
     echo "<div class='text-center py-20 text-red-500'>Course not found.</div>";
     exit;
@@ -74,7 +67,6 @@ if (!$current_course) {
         </div>
 
         <div class="flex items-center gap-4 bg-white dark:bg-gray-900 p-2 rounded-lg border border-gray-200 dark:border-gray-800 shadow-sm">
-            
             <div class="flex items-center gap-2 px-3 py-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -87,7 +79,7 @@ if (!$current_course) {
 
             <div class="w-px h-8 bg-gray-200 dark:bg-gray-800"></div>
 
-            <?php if (!empty($current_course['moodle_course_url'])): ?>
+            <?php if (!empty($current_course['moodle_course_url'])) : ?>
                 <a href="<?php echo htmlspecialchars($current_course['moodle_course_url']); ?>" 
                     target="_blank" 
                     class="flex items-center gap-2 px-3 py-1 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-md transition-colors group">
@@ -102,52 +94,63 @@ if (!$current_course) {
             <?php endif; ?>
         </div>
     </div>
+</div>
 
-    <div class="flex items-center gap-4 text-sm text-muted-foreground border-l-2 border-primary pl-4">
-        <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Starts: <span class="text-foreground font-medium"><?php echo $current_course['opens_at_date']; ?></span>
+<div class="flex flex-col md:flex-row items-center justify-between border-b pb-4 mb-6 gap-4">
+    <div class="flex items-center gap-3 w-full md:w-auto">
+        <h2 class="text-2xl font-bold tracking-tight whitespace-nowrap">Projects</h2>
+        <span id="projectCount" class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-sm font-mono px-2 py-0.5 rounded-full">
+            <?php echo count($projects); ?>
+        </span>
+    </div>
+
+    <div class="flex items-center gap-4 w-full md:w-auto">
+        <div class="relative w-full md:w-64">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="absolute left-2.5 top-2.5 text-muted-foreground"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+            <input 
+                type="text" 
+                id="projectSearch" 
+                placeholder="Search name, theme, desc..." 
+                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 pl-9"
+            >
         </div>
-        <div class="flex items-center gap-1.5">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Ends: <span class="text-foreground font-medium"><?php echo $current_course['closes_at_date']; ?></span>
-        </div>
+
+        <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" class="gap-2 whitespace-nowrap">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+            Create Project
+        </ui-button>
     </div>
 </div>
 
-<div class="flex items-center justify-between border-b pb-4 mb-6">
-    <h2 class="text-2xl font-bold tracking-tight flex items-center gap-3">
-        Projects
-        <span class="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-sm font-mono px-2 py-0.5 rounded-full">
-            <?php echo count($projects); ?>
-        </span>
-    </h2>
+<div id="projectsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <?php if (count($projects) > 0) : ?>
+        <?php foreach ($projects as $project) : ?>
+            <ui-card 
+                class="project-card-item group flex flex-col rounded-xl border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 hover:shadow-2xl relative cursor-pointer !py-0 !overflow-visible"
+                data-searchable="<?php echo htmlspecialchars(strtolower($project['name'] . ' ' . ($project['topic'] ?? '') . ' ' . ($project['description'] ?? ''))); ?>"
+            >
+                <div class="w-full aspect-[21/9] bg-gray-100 dark:bg-gray-900 relative rounded-t-xl z-20 pointer-events-none">
+                    <a href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/projects/<?php echo $project['id']; ?>" class="absolute inset-0 z-10 rounded-xl pointer-events-none">
+                        <span class="sr-only">View Project</span>
 
-    <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" class="gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-        Create Project
-    </ui-button>
-</div>    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-    <?php if (count($projects) > 0): ?>
-        <?php foreach ($projects as $project): ?>
-            
-            <ui-card class="group flex flex-col rounded-xl border-2 border-transparent hover:border-gray-200 dark:hover:border-gray-700 transition-all duration-300 hover:shadow-2xl !p-0 !overflow-visible">
-                <div class="w-full aspect-[21/9] bg-gray-100 dark:bg-gray-900 relative rounded-t-xl z-20">
-                    <project-banner 
-                        name="<?php echo htmlspecialchars($project['name']); ?>"
-                        color="<?php echo $project['color']; ?>"
-                        members='<?php echo json_encode($project['members']); ?>'
-                    ></project-banner>
+                        <project-banner 
+                            name="<?php echo htmlspecialchars($project['name']); ?>"
+                            color="<?php echo $project['color']; ?>"
+                            members='<?php echo json_encode($project['members']); ?>'
+                        ></project-banner>
+                    </a>
                 </div>
 
-                <ui-card-content class="flex flex-col flex-grow p-5 pt-6 relative z-10 bg-white dark:bg-black rounded-b-xl">
+                <ui-card-content class="flex flex-col flex-grow p-5 pt-6 relative z-20 bg-white dark:bg-black rounded-b-xl pointer-events-none">
                     <div class="flex justify-between items-start mb-2">
-                          <a href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/projects/<?php echo $project['id']; ?>" class="group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                            <h3 class="font-bold text-lg leading-tight">
-                                <?php echo htmlspecialchars($project['name']); ?>
-                            </h3>
-                          </a>
+                        <h3 class="font-bold text-lg leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                            <?php echo htmlspecialchars($project['name']); ?>
+                        </h3>
                     </div>
+
+                    <?php if (!empty($project['topic'])) : ?>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-primary mb-2"><?php echo htmlspecialchars($project['topic']); ?></span>
+                    <?php endif; ?>
 
                     <p class="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 mb-4">
                         <?php echo htmlspecialchars($project['description'] ?? 'No description provided.'); ?>
@@ -158,29 +161,63 @@ if (!$current_course) {
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                             <span>Team of <?php echo count($project['members']); ?></span>
                         </div>
-                        
-                        <a href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/projects/<?php echo $project['id']; ?>" class="text-sm font-medium flex items-center gap-1 hover:gap-2 transition-all text-gray-900 dark:text-gray-100">
+
+                        <span class="text-sm font-medium flex items-center gap-1 group-hover:gap-2 transition-all text-gray-900 dark:text-gray-100">
                             Open
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-                        </a>
+                        </span>
                     </div>
                 </ui-card-content>
-
             </ui-card>
 
         <?php endforeach; ?>
-    <?php else: ?>
-        
+
+        <div id="noResultsMsg" class="hidden col-span-full py-16 flex flex-col items-center justify-center text-center">
+              <p class="text-muted-foreground">No matches for this search.</p>
+        </div>
+    <?php else : ?>
         <div class="col-span-full py-16 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
-            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-            </div>
             <h3 class="text-xl font-bold">No projects yet</h3>
-            <p class="text-gray-500 max-w-sm mt-2 mb-6">Start collaborating by creating the first project for this course.</p>
-            <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" variant="outline">
+            <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" variant="outline" class="mt-4">
                 Create Project
             </ui-button>
         </div>
-
     <?php endif; ?>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('projectSearch');
+    const projects = document.querySelectorAll('.project-card-item');
+    const noResultsMsg = document.getElementById('noResultsMsg');
+    const projectCountLabel = document.getElementById('projectCount');
+    let timeout = null;
+
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(timeout);
+            const term = e.target.value.toLowerCase().trim();
+
+            timeout = setTimeout(() => {
+                let visibleCount = 0;
+                projects.forEach(card => {
+                    const data = card.getAttribute('data-searchable');
+                    if (data.includes(term)) {
+                        card.style.display = ''; 
+                        visibleCount++;
+                    } else {
+                        card.style.display = 'none'; 
+                    }
+                });
+
+                if (noResultsMsg) {
+                    noResultsMsg.style.display = (visibleCount === 0 && projects.length > 0) ? 'flex' : 'none';
+                }
+                if (projectCountLabel) {
+                    projectCountLabel.textContent = visibleCount;
+                }
+            }, 250); 
+        });
+    }
+});
+</script>
