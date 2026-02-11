@@ -25,6 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 $enrollStmt->execute([$_SESSION['user_id'], $courseId]);
             }
 
+            // JavaScript Redirect to prevent "Headers already sent" error
             echo "<script>window.location.href = window.location.href;</script>";
             exit;
 
@@ -37,14 +38,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 $current_course = null;
 $projects = [];
 
-$userId = $_SESSION['user_id'] ?? null;
+$userId = $_SESSION['user_id'] ?? null; 
 $userRole = '';
 $isEnrolled = false;
 $hasProjectInCourse = false;
 
 try {
     if (isset($courseId) && $courseId > 0) {
-        // 1. Fetch Course Details
+        // Fetch Course Details
         $stmt = $pdo->prepare("
             SELECT c.*, 
             (SELECT COUNT(*) FROM enrollments WHERE course_id = c.id) AS enrolled_count
@@ -170,6 +171,13 @@ if (!$current_course) {
             >
         </div>
 
+        <?php if ($userRole === 'admin'): ?>
+            <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/edit" variant="outline" class="gap-2 whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Edit Course
+            </ui-button>
+        <?php endif; ?>
+
         <?php if ($userRole === 'student') : ?>
             <?php if (!$isEnrolled) : ?>
                 <form action="" method="POST">
@@ -248,10 +256,7 @@ if (!$current_course) {
     <?php else : ?>
         <div class="col-span-full py-16 flex flex-col items-center justify-center text-center border-2 border-dashed border-gray-200 dark:border-gray-800 rounded-xl">
             <h3 class="text-xl font-bold">No projects yet</h3>
-            
-            <?php 
-            if ($userRole === 'student' && $isEnrolled && !$hasProjectInCourse): 
-            ?>
+            <?php if ($userRole === 'student' && $isEnrolled && !$hasProjectInCourse) : ?>
                 <ui-button href="<?php echo BASE_URL; ?>/courses/<?php echo $courseId; ?>/project-create" variant="outline" class="mt-4">
                     Create Project
                 </ui-button>
@@ -291,7 +296,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (projectCountLabel) {
                     projectCountLabel.textContent = visibleCount;
                 }
-            }, 250);
+            }, 250); 
         });
     }
 });
