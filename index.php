@@ -75,6 +75,13 @@ switch ($request) {
             break;
         }
 
+        // Route: Download project (GET /download/project/UUID)
+        if (preg_match('#^download/project/([a-zA-Z0-9\-_]+)$#', $request, $matches)) {
+            $targetId = $matches[1];
+            require 'scripts/download_project.php'; // We will create this file next
+            exit;
+        }
+
         // --- 404 Not Found ---
         http_response_code(404);
         $view = 'views/404.php';

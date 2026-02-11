@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     faculty_number VARCHAR(50) NOT NULL UNIQUE,
-    avatar_url TEXT,
+    avatar_url TEXT NULL,
 
     university_email VARCHAR(255) NOT NULL UNIQUE,
     password_hash TEXT NOT NULL,
@@ -32,7 +32,6 @@ CREATE TABLE IF NOT EXISTS enrollments (
     id VARCHAR(36) PRIMARY KEY, -- UUIDs are 36-byte
     student_id VARCHAR(36) NOT NULL,
     course_id VARCHAR(255) NOT NULL,
-    grade INTEGER,
 
     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
@@ -43,7 +42,8 @@ CREATE TABLE IF NOT EXISTS group_projects (
     course_id VARCHAR(255) NOT NULL,
     name TEXT NOT NULL,
     topic TEXT NOT NULL,
-    description TEXT,
+    description TEXT NUll,
+    zip_file_path TEXT NULL,
 
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE CASCADE
 );

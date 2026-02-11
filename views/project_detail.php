@@ -113,17 +113,23 @@ if (!$project): ?>
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                 Resources
             </h3>
-            <div class="flex flex-wrap gap-4">
+
+            <?php if (!empty($project['zip_file_path'])) : ?>
                 <a href="#" class="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm hover:bg-accent hover:text-accent-foreground transition-colors gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                    Project URL
+                        Project URL
                 </a>
-                
-                <a href="#" class="inline-flex items-center justify-center rounded-md bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border border-yellow-500/20 px-4 py-2 text-sm font-medium hover:bg-yellow-500/20 transition-colors gap-2">
+                <a href="<?php echo BASE_URL; ?>/download/project/<?php echo $projectId; ?>" 
+                  class="inline-flex items-center justify-center rounded-md bg-yellow-500/10 text-yellow-600 dark:text-yellow-500 border border-yellow-500/20 px-4 py-2 text-sm font-medium hover:bg-yellow-500/20 transition-colors gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     Download Source Code
                 </a>
-            </div>
+            <?php else : ?>
+                <span class="inline-flex items-center justify-center rounded-md bg-gray-100 text-gray-400 border border-gray-200 px-4 py-2 text-sm font-medium cursor-not-allowed gap-2" title="No source code uploaded">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    No Code
+                </span>
+            <?php endif; ?>
         </section>
     </div>
 
@@ -133,12 +139,12 @@ if (!$project): ?>
                 <ui-card-title class="text-base font-bold uppercase tracking-wider text-muted-foreground">Team Members</ui-card-title>
             </ui-card-header>
             <ui-card-content class="grid gap-4">
-                <?php foreach ($members as $member): ?>
+                <?php foreach ($members as $member) : ?>
                     <div class="flex items-center gap-3 group">
                         <div class="h-10 w-10 rounded-full overflow-hidden border border-gray-200 dark:border-gray-700 bg-gray-100 shrink-0">
-                            <?php if (!empty($member['avatar_url'])): ?>
+                            <?php if (!empty($member['avatar_url'])) : ?>
                                 <img src="<?php echo htmlspecialchars($member['avatar_url']); ?>" alt="Avatar" class="h-full w-full object-cover">
-                            <?php else: ?>
+                            <?php else : ?>
                                 <img src="https://api.dicebear.com/9.x/avataaars/svg?seed=<?php echo $member['id']; ?>&backgroundColor=b6e3f4" class="h-full w-full object-cover">
                             <?php endif; ?>
                         </div>
