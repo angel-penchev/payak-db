@@ -6,16 +6,15 @@ $current_user_id = $_SESSION['user_id'] ?? null;
 $error = '';
 $success = '';
 
-// Обработка на изпратената форма
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Получаване на данните (вече включваме и id)
-    $courseId = trim($_POST['id'] ?? ''); 
+    // Get data
+    $courseId = trim($_POST['id'] ?? '');
     $name = trim($_POST['display_name'] ?? '');
     $moodle = trim($_POST['moodle_url'] ?? '');
     $open = $_POST['opens_at'] ?? '';
     $close = $_POST['closes_at'] ?? '';
 
-    // Валидация на данните
+    // Data Validation
     if (!$current_user_id) {
         $error = "You must be logged in to create a course.";
     } elseif (empty($courseId) || empty($name) || empty($moodle) || empty($open) || empty($close)) {
@@ -24,10 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = "Closing date cannot be earlier than opening date.";
     } else {
         try {
-            // Запис в базата данни (увери се, че колоната 'id' съществува в таблицата ти)
+            // Insert into database
             $sql = "INSERT INTO courses (id, display_name, moodle_course_url, opens_at_date, closes_at_date, owner_id) 
                     VALUES (:cid, :name, :moodle, :open, :close, :owner)";
-            
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 ':cid'    => $courseId,
@@ -39,9 +37,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ]);
 
             $success = "Course created successfully!";
-            $_POST = []; // Изчистване на формата при успех
+            $_POST = []; // Clear form on success
         } catch (PDOException $e) {
-            // Проверка за дублиращ се ID или Moodle линк
+            // Check for duplicate ID (Error 23000)
             if ($e->getCode() == 23000) {
                 $error = "A course with this ID or Moodle URL already exists.";
             } else {
@@ -67,18 +65,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         <?php endif; ?>
 
-        <ui-card class="shadow-xl border-t-4 border-t-black">
-            <ui-card-header>
-                <ui-card-title class="text-2xl font-black uppercase tracking-tight">Create Course</ui-card-title>
+        <ui-card class="shadow-xl">
+            <ui-card-header> <ui-card-title class="text-2xl font-black tracking-tight">Create Course</ui-card-title>
                 <ui-card-description>Enter the details below to register a new course.</ui-card-description>
             </ui-card-header>
 
             <ui-card-content>
                 <form method="POST" action="" class="grid gap-6">
-                    
                     <div class="grid grid-cols-3 gap-4">
                         <div class="grid gap-2 col-span-2">
-                            <ui-label class="font-bold uppercase text-xs">Course Name</ui-label>
+                            <ui-label>Course Name</ui-label>
                             <ui-input 
                                 name="display_name"
                                 placeholder="Advanced Web Applications"
@@ -87,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </ui-input>
                         </div>
                         <div class="grid gap-2 col-span-1">
-                            <ui-label class="font-bold uppercase text-xs">Course ID</ui-label>
+                            <ui-label>Course ID</ui-label>
                             <ui-input 
                                 name="id"
                                 placeholder="CS101"
@@ -95,12 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 required>
                             </ui-input>
                         </div>
-
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
                         <div class="grid gap-2">
-                            <ui-label class="font-bold uppercase text-xs">Opening Date</ui-label>
+                            <ui-label>Opening Date</ui-label>
                             <ui-input 
                                 type="date"
                                 name="opens_at"
@@ -109,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             </ui-input>
                         </div>
                         <div class="grid gap-2">
-                            <ui-label class="font-bold uppercase text-xs">Closing Date</ui-label>
+                            <ui-label>Closing Date</ui-label>
                             <ui-input 
                                 type="date"
                                 name="closes_at"
@@ -120,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
 
                     <div class="grid gap-2">
-                        <ui-label class="font-bold uppercase text-xs">Moodle Course URL</ui-label>
+                        <ui-label>Moodle Course URL</ui-label>
                         <ui-input
                             type="url"
                             name="moodle_url"
@@ -130,18 +125,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </ui-input>
                     </div>
 
-                    <div class="flex flex-col gap-3 pt-4">
-                        <button 
-                            type="submit" 
-                            class="inline-flex items-center justify-center rounded-md text-sm font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 h-12 px-4 py-2 bg-black text-white hover:bg-gray-800 uppercase tracking-widest active:scale-[0.98]">
+                    <div class="flex flex-row-reverse gap-4 pt-4">
+                        <ui-button type="submit" class="flex-1">
                             Create Course
-                        </button>
-                        
-                        <a href="<?php echo BASE_URL; ?>/courses" class="text-center text-xs font-bold text-gray-500 hover:text-black uppercase underline transition-colors">
+                        </ui-button>
+ 
+                        <ui-button href="<?php echo BASE_URL; ?>/courses" variant="ghost" class="flex-1">
                             Cancel
-                        </a>
+                        </ui-button>
                     </div>
-
                 </form>
             </ui-card-content>
         </ui-card>
